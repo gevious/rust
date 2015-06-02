@@ -5,7 +5,7 @@ use std::collections::HashMap;
 ///
 /// Note: It only works up to about n=45, since after that it runs into
 /// stack overflow issues.
-pub fn fib_basic(n: u32) -> u64 {
+pub fn fib_rec(n: u32) -> u64 {
     // Calculate the nth fibonacci number
     //
     // NOTE: This function only works up to about n=45, before running into
@@ -25,34 +25,50 @@ pub fn fib_basic(n: u32) -> u64 {
 /// Note: This function works up to about n=94 after which we run into an
 /// 'arithmetic overflow' error
 pub fn fib_hash(n: u32) -> u64 {
-    // we can improve this with match, but for now the simple case first
     let mut map : HashMap<u32,u64> = HashMap::new();
-    for i in 1..n+1 {
-        if i <= 2 {
-            map.insert(i, 1);
-            continue;
-        }
-        // get the previous two numbers and save the sum into the map
-        let n1 = match map.get(&(i-1)) {
+
+    // This is the engine which recurses saving each value in the map
+    fn f(map: &mut HashMap<u32,u64>, n: u32) -> u64 {
+        let c = match map.get(&n) {
             Some(&number) => number,
             _ => 0
         };
-        let n2 = match map.get(&(i-2)) {
-            Some(&number) => number,
-            _ => 0
+        if c != 0 { return c }
+        let m = match n {
+            1 if n < 1   => 0,
+            1 ... 2      => 1,
+            _            => f(map, n-1) + f(map, n-2),
         };
-        map.insert(i, n1 + n2);
-    };
-    match map.get(&n) {
-        Some(&number) => number,
-        _ => 0
+        map.insert(n, m);
+        m
     }
+    f(&mut map, n)
+}
+
+/// This function counts up saving only the last two preceeding values. It 
+/// can be converted into a generator for more versatility.
+///
+/// Note: This function also has an upper limit of n=94 because of the upper
+/// bound of u64 (the same as `fib_hash`)
+pub fn fib_count(n: u32) -> u64 {
+    if n < 1 { return 0 }
+    if n < 3 { return 1 }
+
+    let (mut a, mut b) = (1, 1);
+    let mut f = 0;
+    for _ in 3..n+1 {
+        f = a + b;
+        a = b;
+        b = f;
+    }
+    f
 }
 
 /// This is a proxy function to call our relevant fibonacci function
 pub fn fib(n: u32) -> u64 {
-    //fib_basic(n)
+    //fib_rec(n)
     fib_hash(n)
+    //fib_count(n)
 }
 
 fn main() {
@@ -95,10 +111,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_fib_basic() {
-        assert_eq!(fib_basic(3), 2);
-        assert_eq!(fib_basic(5), 5);
-        assert_eq!(fib_basic(7), 13);
+    fn test_fib_rec() {
+        assert_eq!(fib_rec(3), 2);
+        assert_eq!(fib_rec(5), 5);
+        assert_eq!(fib_rec(7), 13);
     }
 
     #[test]
@@ -106,5 +122,12 @@ mod tests {
         assert_eq!(fib_hash(3), 2);
         assert_eq!(fib_hash(5), 5);
         assert_eq!(fib_hash(7), 13);
+    }
+
+    #[test]
+    fn test_fib_count() {
+        assert_eq!(fib_count(3), 2);
+        assert_eq!(fib_count(5), 5);
+        assert_eq!(fib_count(7), 13);
     }
 }
