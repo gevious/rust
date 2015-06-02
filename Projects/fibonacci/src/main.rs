@@ -1,3 +1,4 @@
+#![feature(test)]
 use std::io;
 use std::collections::HashMap;
 
@@ -16,7 +17,7 @@ pub fn fib_rec(n: u32) -> u64 {
     if n < 2 {
         return 1
     }
-    fib(n-1) + fib(n-2)
+    fib_rec(n-1) + fib_rec(n-2)
 }
 
 /// This function uses a hash map to store previous numbers to try improve
@@ -67,8 +68,8 @@ pub fn fib_count(n: u32) -> u64 {
 /// This is a proxy function to call our relevant fibonacci function
 pub fn fib(n: u32) -> u64 {
     //fib_rec(n)
-    fib_hash(n)
-    //fib_count(n)
+    //fib_hash(n)
+    fib_count(n)
 }
 
 fn main() {
@@ -106,9 +107,16 @@ fn main() {
     }
 }
 
+
+extern crate test;
+// NOTE: tests will only run with unstable version of rust. This is due to the
+// test crate still being unstable.
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use test::Bencher;
+    use test::black_box;
 
     #[test]
     fn test_fib_rec() {
@@ -129,5 +137,77 @@ mod tests {
         assert_eq!(fib_count(3), 2);
         assert_eq!(fib_count(5), 5);
         assert_eq!(fib_count(7), 13);
+    }
+
+    #[bench]
+    fn bench_5_fib_count(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(5);
+            fib_count(n)
+        });
+    }
+
+    #[bench]
+    fn bench_20_fib_count(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(20);
+            fib_count(n)
+        });
+    }
+
+    #[bench]
+    fn bench_40_fib_count(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(40);
+            fib_count(n)
+        });
+    }
+
+    #[bench]
+    fn bench_5_fib_hash(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(5);
+            fib_hash(n)
+        });
+    }
+
+    #[bench]
+    fn bench_20_fib_hash(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(20);
+            fib_hash(n)
+        });
+    }
+
+    #[bench]
+    fn bench_40_fib_hash(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(40);
+            fib_hash(n)
+        });
+    }
+
+    #[bench]
+    fn bench_5_fib_rec(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(5);
+            fib_rec(n)
+        });
+    }
+
+    #[bench]
+    fn bench_20_fib_rec(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(20);
+            fib_rec(n)
+        });
+    }
+
+    #[bench]
+    fn bench_40_fib_rec(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(40);
+            fib_rec(n)
+        });
     }
 }
