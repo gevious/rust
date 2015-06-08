@@ -3,3 +3,7 @@
 name = "fibonacci"
 version = "0.0.1"
 authors = ["Nico Gevers <me@gevious.com>"]
+
+[lib]
+name = "main"
+crate-type = ["dylib"]

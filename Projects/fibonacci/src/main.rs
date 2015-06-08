@@ -6,7 +6,7 @@ use std::collections::HashMap;
 ///
 /// Note: It only works up to about n=45, since after that it runs into
 /// stack overflow issues.
-pub fn fib_rec(n: u32) -> u64 {
+pub fn fib_rec(n: u8) -> u64 {
     // Calculate the nth fibonacci number
     //
     // NOTE: This function only works up to about n=45, before running into
@@ -25,11 +25,11 @@ pub fn fib_rec(n: u32) -> u64 {
 ///
 /// Note: This function works up to about n=94 after which we run into an
 /// 'arithmetic overflow' error
-pub fn fib_hash(n: u32) -> u64 {
-    let mut map : HashMap<u32,u64> = HashMap::new();
+pub fn fib_hash(n: u8) -> u64 {
+    let mut map : HashMap<u8,u64> = HashMap::new();
 
     // This is the engine which recurses saving each value in the map
-    fn f(map: &mut HashMap<u32,u64>, n: u32) -> u64 {
+    fn f(map: &mut HashMap<u8,u64>, n: u8) -> u64 {
         let c = match map.get(&n) {
             Some(&number) => number,
             _ => 0
@@ -45,13 +45,36 @@ pub fn fib_hash(n: u32) -> u64 {
     }
     f(&mut map, n)
 }
+/// This is an alternative hash approach from
+/// http://stackoverflow.com/questions/30590341/recursive-fibonacci-with-hashmap-cache
+/// in answer to my SO question.
+pub fn fib_hash2(n: u8) -> u64 {
+    // This is the engine which recurses saving each value in the map
+    fn f(map: HashMap<u8,u64>, n: u8) -> (HashMap<u8, u64>, u64) {
+        if let Some(&number) = map.get(&n) {
+            return (map, number);
+        }
+        let (map, a) = f(map, n - 1);
+        let (mut map, b) = f(map, n - 2);
+        let res = a + b;
+        map.insert(n, res);
+        (map, res)
+    }
+    let mut map = HashMap::new();
+    map.insert(0, 0);
+    map.insert(1, 1);
+    map.insert(2, 1);
+    f(map, n).1
+}
+
+
 
 /// This function counts up saving only the last two preceeding values. It 
 /// can be converted into a generator for more versatility.
 ///
 /// Note: This function also has an upper limit of n=94 because of the upper
 /// bound of u64 (the same as `fib_hash`)
-pub fn fib_count(n: u32) -> u64 {
+pub fn fib_count(n: u8) -> u64 {
     if n < 1 { return 0 }
     if n < 3 { return 1 }
 
@@ -66,9 +89,10 @@ pub fn fib_count(n: u32) -> u64 {
 }
 
 /// This is a proxy function to call our relevant fibonacci function
-pub fn fib(n: u32) -> u64 {
+pub fn fib(n: u8) -> u64 {
     //fib_rec(n)
     //fib_hash(n)
+    //fib_hash2(n)
     fib_count(n)
 }
 
@@ -85,7 +109,7 @@ fn main() {
             .ok()
             .expect("Failed to read the number");
 
-        let n: u32 = match n.trim().parse() {
+        let n: u8 = match n.trim().parse() {
             Ok(num) => num,
             Err(_) => {
                 println!("Not a valid number. Try again");
@@ -186,6 +210,29 @@ mod tests {
             fib_hash(n)
         });
     }
+    #[bench]
+    fn bench_5_fib_hash2(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(5);
+            fib_hash2(n)
+        });
+    }
+
+    #[bench]
+    fn bench_20_fib_hash2(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(20);
+            fib_hash2(n)
+        });
+    }
+
+    #[bench]
+    fn bench_40_fib_hash2(b: &mut Bencher) {
+        b.iter(|| {
+            let n = black_box(40);
+            fib_hash2(n)
+        });
+    }
 
     #[bench]
     fn bench_5_fib_rec(b: &mut Bencher) {
@@ -210,4 +257,21 @@ mod tests {
             fib_rec(n)
         });
     }
+}
+
+// we create some external functions so we can include this library from other
+// code
+#[no_mangle]
+pub extern fn fibonacci_recursive(n: u8) -> u64 {
+    fib_rec(n)
+}
+
+#[no_mangle]
+pub extern fn fibonacci_hash_recursive(n: u8) -> u64 {
+    fib_hash(n)
+}
+
+#[no_mangle]
+pub extern fn fibonacci_fast(n: u8) -> u64 {
+    fib_count(n)
 }
