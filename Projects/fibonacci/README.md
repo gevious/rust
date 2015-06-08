@@ -31,15 +31,14 @@ various ways.
 ## Python comparison
 
     All values count fibonacci for n=35
-    Time Taken for recursive: 0.09705948829650879 seconds
-    Time Taken for python recursive: 4.83321213722229 seconds
-    Difference: 4736.152648925781 milli seconds
-    
-    Time Taken for hash: 0.00021314620971679688 seconds
-    Time Taken for python recursive hash: 12.549077987670898 milli seconds
-    Difference: 12548.864841461182 milli seconds
+    Time Taken for recursive: 0.09680843353271484 seconds
+    Time Taken for python recursive: 4.82248592376709 seconds
+    Difference: 4725.677490234375 milli seconds
 
-    Time Taken for fast: 4.4345855712890625e-05 seconds
-    Time Taken for python fast: 1.4066696166992188e-05 seconds
-    Difference: -0.030279159545898438 milli seconds
-    
+    Time Taken for hash: 0.00019431114196777344 seconds
+    Time Taken for python recursive hash: 11.890489339828491 seconds
+    Difference: 11890.295028686523 milli seconds
+
+    Time Taken for fast: 4.696846008300781e-05 seconds
+    Time Taken for python fast: 9.298324584960938e-06 seconds
+    Difference: -0.037670135498046875 milli seconds

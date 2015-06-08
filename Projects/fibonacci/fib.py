@@ -32,20 +32,22 @@ def fib_recursive(n):
     return fib_recursive(n-1) + fib_recursive(n-2)
 
 
-h = {}
-
-
 def fib_recursive_hash(n):
-    if n < 1:
-        h[n] = 0
-        return 0
-    elif n < 2:
-        h[n] = 1
-        return 1
-    a = h.get(n-1, fib_recursive_hash(n-1))
-    b = h.get(n-2, fib_recursive_hash(n-2))
-    h[n] = a + b
-    return a + b
+    h = {}
+
+    def f(n):
+        if n < 1:
+            h[n] = 0
+            return 0
+        elif n < 2:
+            h[n] = 1
+            return 1
+        a = h.get(n-1, f(n-1))
+        b = h.get(n-2, f(n-2))
+        h[n] = a + b
+        return a + b
+    return f(n)
+
 
 fib_num = 35
 print("All values count fibonacci for n={}".format(fib_num))
@@ -69,7 +71,7 @@ print("Time Taken for hash: {} seconds".format(rt))
 t = float(time.time())
 fib_recursive_hash(fib_num)
 pt = float(time.time()) - t
-print("Time Taken for python recursive hash: {} milli seconds".format(pt))
+print("Time Taken for python recursive hash: {} seconds".format(pt))
 print("Difference: {} milli seconds".format((pt - rt)*1000))
 print("")
 
